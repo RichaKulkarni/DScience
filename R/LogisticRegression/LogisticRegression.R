@@ -46,6 +46,8 @@ training <- flights_dummy[partition_index,]
 # Set 40% of the data for testing
 testing <- flights_dummy[-partition_index,]
 
+###### TRAINING #######
+
 #Feed training data (60%) into logistic regression model
 model <- glm(formula = as.factor(FlightStatus) ~ ., family = binomial, data = training)
 summary(model)
@@ -63,3 +65,20 @@ ROCRpred <- prediction(predict, training$FlightStatus)
 ROCRperf <- performance(ROCRpred, 'tpr', 'fpr')
 plot(ROCRperf)
 
+##### TESTING ######
+#Feed training data (60%) into logistic regression model
+model <- glm(formula = as.factor(FlightStatus) ~ ., family = binomial, data = testing)
+summary(model)
+#Find each training entry's prediction probability
+predict <- predict(model, type='response')
+
+#confusion matrix with TP, FP, TN, FN
+table(testing$FlightStatus, predict>0.5)
+
+#Calculate and plot ROC curve
+library(gplots)
+library(ROCR)
+#Classified prediction of on time or delayed
+ROCRpred <- prediction(predict, testing$FlightStatus)
+ROCRperf <- performance(ROCRpred, 'tpr', 'fpr')
+plot(ROCRperf)
