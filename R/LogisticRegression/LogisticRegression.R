@@ -55,15 +55,28 @@ summary(model)
 predict <- predict(model, type='response')
 
 #confusion matrix with TP, FP, TN, FN
-table(training$FlightStatus, predict>0.5)
+cm <- table(training$FlightStatus, predict>0.5)
+cm
+
+#Precision = TP/(TP+FP)
+precision <- cm[1,1]/(cm[1,1] + cm[1,2])
+sprintf("Precision = %s", precision)
+
+#Recall = TP/(TP + FN)
+recall <- cm[1,1]/(cm[1,1] + cm[2,1])
+sprintf("Recall = %s", recall)
 
 #Calculate and plot ROC curve
 library(gplots)
 library(ROCR)
+library(caTools)
+library(ModelMetrics)
 #Classified prediction of on time or delayed
 ROCRpred <- prediction(predict, training$FlightStatus)
 ROCRperf <- performance(ROCRpred, 'tpr', 'fpr')
 plot(ROCRperf)
+A <- auc(training$FlightStatus, predict)
+sprintf("AUC = %s", A)
 
 ##### TESTING ######
 #Feed training data (60%) into logistic regression model
@@ -73,12 +86,21 @@ summary(model)
 predict <- predict(model, type='response')
 
 #confusion matrix with TP, FP, TN, FN
-table(testing$FlightStatus, predict>0.5)
+cm <- table(testing$FlightStatus, predict>0.5)
+
+#Precision = TP/(TP+FP)
+precision <- cm[1,1]/(cm[1,1] + cm[1,2])
+sprintf("Precision = %s", precision)
+
+#Recall = TP/(TP + FN)
+recall <- cm[1,1]/(cm[1,1] + cm[2,1])
+sprintf("Recall = %s", recall)
 
 #Calculate and plot ROC curve
-library(gplots)
-library(ROCR)
 #Classified prediction of on time or delayed
 ROCRpred <- prediction(predict, testing$FlightStatus)
 ROCRperf <- performance(ROCRpred, 'tpr', 'fpr')
 plot(ROCRperf)
+A <- auc(testing$FlightStatus, predict)
+sprintf("AUC = %s", A)
+
